@@ -5,6 +5,9 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { Category } from './category.entity';
+import { CreateDateColumn } from 'typeorm';
+
+
 
 @Entity()
 export class Product {
@@ -41,4 +44,7 @@ export class Product {
     },
   )
   category!: Category;
+
+  @CreateDateColumn()
+createdAt!: Date;
 }

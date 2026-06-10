@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -16,14 +16,14 @@ export class ProductsService {
     private categoryRepo: Repository<Category>,
   ) {}
 
+  // CREATE PRODUCT
   async create(dto: CreateProductDto) {
-    const category =
-      await this.categoryRepo.findOne({
-        where: { id: dto.categoryId },
-      });
+    const category = await this.categoryRepo.findOne({
+      where: { id: dto.categoryId },
+    });
 
     if (!category) {
-      throw new Error('Category not found');
+      throw new NotFoundException('Category not found');
     }
 
     const product = this.productRepo.create({
@@ -33,10 +33,34 @@ export class ProductsService {
       category,
     });
 
-    return this.productRepo.save(product);
+    return await this.productRepo.save(product);
   }
 
+  // GET ALL PRODUCTS
   async findAll() {
-    return this.productRepo.find();
+    return await this.productRepo.find({
+      relations: {
+        category: true,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
+  // GET SINGLE PRODUCT
+  async findOne(id: string) {
+    const product = await this.productRepo.findOne({
+      where: { id },
+      relations: {
+        category: true,
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    return product;
   }
 }
