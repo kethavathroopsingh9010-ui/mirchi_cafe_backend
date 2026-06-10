@@ -9,11 +9,18 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { OrdersModule } from './orders/orders.module';
+import { CartModule } from './cart/cart.module';
+import { RealtimeModule } from './realtime/realtime.module';
+import { RidersModule } from './riders/riders.module';
+import { PaymentsModule } from './payments/payments.module';
+import { BranchModule } from './branch/branch.module';
+
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    
     }),
 
     TypeOrmModule.forRoot({
@@ -32,6 +39,11 @@ import { OrdersModule } from './orders/orders.module';
     UsersModule,
     ProductsModule,
     OrdersModule,
+    CartModule,
+    RealtimeModule,
+    RidersModule,
+    PaymentsModule,
+    BranchModule,
   ],
   controllers: [AppController],
   providers: [AppService],
