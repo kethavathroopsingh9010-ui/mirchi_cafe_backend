@@ -1,0 +1,59 @@
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
+
+import { Order } from '../../orders/entities/order.entity';
+
+export enum PaymentMethod {
+  COD = 'cod',
+  CARD = 'card',
+}
+
+export enum PaymentStatus {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  SUCCESS = 'success',
+  FAILED = 'failed',
+  REFUNDED = 'refunded',
+}
+
+@Entity()
+export class Payment {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
+
+  @OneToOne(() => Order, { eager: true })
+  @JoinColumn()
+  order!: Order;
+
+  @Column({
+    type: 'enum',
+    enum: PaymentMethod,
+  })
+  method!: PaymentMethod;
+
+  @Column({
+    type: 'enum',
+    enum: PaymentStatus,
+    default: PaymentStatus.PENDING,
+  })
+  status!: PaymentStatus;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  amount!: number;
+
+  @Column({ nullable: true })
+  transactionId!: string;
+
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
+}
