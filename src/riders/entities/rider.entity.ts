@@ -24,6 +24,12 @@ export class Rider {
   @OneToOne(() => User, { eager: true })
   @JoinColumn()
   user!: User;
+   
+  @Column({nullable: true})
+phone!: string;
+
+@Column({nullable: true})
+vehicleNumber!: string;
 
   @Column({ default: true })
   isAvailable!: boolean;
@@ -49,6 +55,8 @@ export class Rider {
 
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  
 
   
 }
