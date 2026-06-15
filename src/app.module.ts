@@ -14,7 +14,15 @@ import { RealtimeModule } from './realtime/realtime.module';
 import { RidersModule } from './riders/riders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { BranchModule } from './branch/branch.module';
-
+import { CommissionModule } from './commission/commission.module';
+import { RiderWalletModule } from './rider-wallet/rider-wallet.module';
+import { CategoriesModule } from './categories/categories.module';
+import { BranchWalletModule } from './branch-wallet/branch-wallet.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { CouponsModule } from './coupons/coupons.module';
+import { DeliveryModule } from './delivery/delivery.module';
+import { NotificationModule } from './notifications/notification.module';
+import { QueueModule } from './queue/queue.module';
 
 @Module({
   imports: [
@@ -30,9 +38,11 @@ import { BranchModule } from './branch/branch.module';
   username: process.env.DATABASE_USER,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
+  entities: [__dirname + '/**/*.entity{.ts,.js}'],
+  schema: 'public',
 
   autoLoadEntities: true,
-  synchronize: process.env.NODE_ENV !== 'production',
+synchronize: true ,
 }),
 
     AuthModule,
@@ -44,6 +54,15 @@ import { BranchModule } from './branch/branch.module';
     RidersModule,
     PaymentsModule,
     BranchModule,
+    CommissionModule,
+    RiderWalletModule,
+    CategoriesModule,
+    BranchWalletModule,
+    AnalyticsModule,
+    CouponsModule,
+    DeliveryModule, 
+    NotificationModule,
+    QueueModule,
   ],
   controllers: [AppController],
   providers: [AppService],
