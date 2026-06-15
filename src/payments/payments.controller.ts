@@ -15,14 +15,8 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post(':orderId')
-  create(
-    @Param('orderId') orderId: string,
-    @Body() body: CreatePaymentDto,
-  ) {
-    return this.paymentsService.createPayment(
-      orderId,
-      body.method,
-    );
+  create(@Param('orderId') orderId: string, @Body() body: CreatePaymentDto) {
+    return this.paymentsService.createPayment(orderId, body.method);
   }
 
   @Patch('success/:paymentId')
@@ -30,14 +24,13 @@ export class PaymentsController {
     @Param('paymentId') paymentId: string,
     @Body() body: { transactionId: string },
   ) {
-    return this.paymentsService.markSuccess(
-      paymentId,
-      body.transactionId,
-    );
+    return this.paymentsService.markSuccess(paymentId, body.transactionId);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.paymentsService.findOne(id);
   }
+
+  
 }

@@ -13,6 +13,8 @@ import { Order } from '../../orders/entities/order.entity';
 export enum PaymentMethod {
   COD = 'cod',
   CARD = 'card',
+  STRIPE = 'stripe', 
+  RAZORPAY = 'razorpay', 
 }
 
 export enum PaymentStatus {
@@ -32,10 +34,7 @@ export class Payment {
   @JoinColumn()
   order!: Order;
 
-  @Column({
-    type: 'enum',
-    enum: PaymentMethod,
-  })
+  @Column({ type: 'enum', enum: PaymentMethod })
   method!: PaymentMethod;
 
   @Column({
@@ -45,8 +44,15 @@ export class Payment {
   })
   status!: PaymentStatus;
 
-  @Column('decimal', { precision: 10, scale: 2 })
-  amount!: number;
+ @Column('decimal', {
+  precision: 10,
+  scale: 2,
+  transformer: {
+    to: (value: number) => value,
+    from: (value: string) => parseFloat(value),
+  },
+})
+amount!: number;
 
   @Column({ nullable: true })
   transactionId!: string;
