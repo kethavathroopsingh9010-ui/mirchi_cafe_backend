@@ -60,33 +60,39 @@ export class AuthService {
 
   // LOGIN
   async login(dto: LoginDto) {
-    const user = await this.userRepo.findOne({
-      where: { email: dto.email },
-    });
+  const user = await this.userRepo
+  .createQueryBuilder('user')
+  .addSelect('user.password')
+  .where('user.email = :email', { email: dto.email })
+  .getOne();
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const isValid = await bcrypt.compare(dto.password, user.password);
-
-    if (!isValid) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const token = this.jwtService.sign({
-      sub: user.id,
-      role: user.role,
-    });
-
-    return {
-      accessToken: token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-    };
+  if (!user || !user.password) {
+    throw new UnauthorizedException('Invalid credentials');
   }
+
+  const isValid = await bcrypt.compare(dto.password, user.password);
+
+  if (!isValid) {
+    throw new UnauthorizedException('Invalid credentials');
+  }
+
+  const token = this.jwtService.sign({
+    sub: user.id,
+    role: user.role,
+  });
+
+  console.log("LOGIN USER:", user);
+  console.log("PASSWORD FROM DB:", user?.password);
+  console.log("INPUT PASSWORD:", dto.password);
+
+  return {
+    accessToken: token,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
+  };
+}
 }
