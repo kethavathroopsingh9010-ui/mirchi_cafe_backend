@@ -11,10 +11,17 @@ export class BranchService {
     private branchRepo: Repository<Branch>,
   ) {}
 
-  create(dto: CreateBranchDto) {
+
+async create(dto: CreateBranchDto) {
+  try {
     const branch = this.branchRepo.create(dto);
-    return this.branchRepo.save(branch);
+    return await this.branchRepo.save(branch);
+  } catch (error) {
+    // This will print the actual PostgreSQL error in your terminal!
+    console.error('DATABASE SAVE ERROR:', error); 
+    throw error; 
   }
+}
 
   findAll() {
     return this.branchRepo.find({

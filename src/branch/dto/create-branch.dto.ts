@@ -1,13 +1,26 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsArray } from 'class-validator';
 
 export class CreateBranchDto {
   @IsString()
+  @IsNotEmpty()
   name!: string;
 
   @IsString()
-  address!: string;
+  @IsNotEmpty()
+  address!: string; 
 
-  @IsOptional()
   @IsString()
-  phone?: string;
+  @IsNotEmpty()
+  countryCode!: string; 
+
+  @IsString()
+  @IsNotEmpty()
+  currency!: string; 
+  @IsNumber()
+  @IsNotEmpty()
+  taxPercentage!: number; 
+
+  @IsArray()
+  @IsString({ each: true })
+  supportedPaymentGateways!: string[]; 
 }
