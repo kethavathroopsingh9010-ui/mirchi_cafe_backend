@@ -4,6 +4,7 @@ import {
   Post,
   Body,
   Param,
+  Query,
 } from '@nestjs/common';
 
 import { ProductsService } from './products.service';
@@ -23,13 +24,14 @@ export class ProductsController {
 
   // GET ALL PRODUCTS
   @Get()
-  findAll() {
-    return this.productsService.findAll();
+  findAll(@Query('branchId') branchId?: string) {
+    return this.productsService.findAll(branchId);
   }
-
   // GET PRODUCT BY ID
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.productsService.findOne(id);
   }
+
+  
 }

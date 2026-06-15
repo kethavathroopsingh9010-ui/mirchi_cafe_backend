@@ -18,34 +18,44 @@ export class ProductsService {
 
   // CREATE PRODUCT
   async create(dto: CreateProductDto) {
-    const category = await this.categoryRepo.findOne({
-      where: { id: dto.categoryId },
-    });
-
-    if (!category) {
-      throw new NotFoundException('Category not found');
-    }
+    const category = dto.categoryId
+      ? await this.categoryRepo.findOne({
+          where: { id: dto.categoryId },
+        })
+      : null;
 
     const product = this.productRepo.create({
       name: dto.name,
-      description: dto.description,
       price: dto.price,
-      category,
+      description: dto.description,
+      category: category ?? undefined,
     });
 
-    return await this.productRepo.save(product);
+    return this.productRepo.save(product);
   }
 
-  // GET ALL PRODUCTS
-  async findAll() {
-    return await this.productRepo.find({
+  // GET ALL PRODUCTS WITH OPTIONAL BRANCH FILTER
+  async findAll(branchId?: string) {
+    const findOptions: any = {
       relations: {
         category: true,
       },
       order: {
         createdAt: 'DESC',
       },
-    });
+    };
+
+    // If a branchId is provided, filter down to that branch's scope.
+    // (Assuming your Product or Category entity maps back to a Branch relationship)
+    if (branchId) {
+      findOptions.where = {
+        category: {
+          branch: { id: branchId }
+        }
+      };
+    }
+
+    return await this.productRepo.find(findOptions);
   }
 
   // GET SINGLE PRODUCT
