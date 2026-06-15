@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { Rider } from './entities/rider.entity';
 import { User } from '../users/entities/user.entity';
 import { Order } from '../orders/entities/order.entity';
+import { CreateRiderDto } from './dto/create-rider.dto'; // 1. Import the DTO
 
 @Injectable()
 export class RidersService {
@@ -23,8 +24,8 @@ export class RidersService {
     private orderRepo: Repository<Order>,
   ) {}
 
-  // Create Rider Profile
-  async create(userId: string) {
+  // Create Rider Profile - FIXED
+  async create(userId: string, createRiderDto: CreateRiderDto) { // 2. Accept the DTO
     const user = await this.userRepo.findOne({
       where: { id: userId },
     });
@@ -33,8 +34,11 @@ export class RidersService {
       throw new NotFoundException('User not found');
     }
 
+    // 3. Destructure and map the non-nullable fields to the entity payload
     const rider = this.riderRepo.create({
       user,
+      phone: createRiderDto.phone,
+      vehicleNumber: createRiderDto.vehicleNumber,
       isAvailable: true,
       earnings: 0,
     });

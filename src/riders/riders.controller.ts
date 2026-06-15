@@ -8,15 +8,20 @@ import {
 } from '@nestjs/common';
 
 import { RidersService } from './riders.service';
+import { CreateRiderDto } from './dto/create-rider.dto'; // 1. Import the DTO
 
 @Controller('riders')
 export class RidersController {
   constructor(private readonly ridersService: RidersService) {}
 
-  // CREATE RIDER
+  // CREATE RIDER - FIXED
   @Post(':userId')
-  create(@Param('userId') userId: string) {
-    return this.ridersService.create(userId);
+  create(
+    @Param('userId') userId: string,
+    @Body() createRiderDto: CreateRiderDto, // 2. Accept the body payload
+  ) {
+    // 3. Pass both arguments to the service
+    return this.ridersService.create(userId, createRiderDto);
   }
 
   // GET ALL RIDERS
