@@ -1,0 +1,35 @@
+name: Mirchi Cafe Production CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main # Triggers code deployment automatically whenever you push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code Repository
+        uses: actions/checkout@v4
+
+      #  CLOUD AUTOMATION ENGINE: logs into AWS EC2 securely via SSH keys
+      - name: Execute Remote Deployment Commands via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.AWS_EC2_HOST }}
+          username: ${{ secrets.AWS_EC2_USERNAME }}
+          key: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+          script: |
+            # Navigate to the live source code production workspace on AWS
+            cd /home/ubuntu/mirchi_cafe/mirchi-backend
+
+            # Fetch the newest code additions cleanly from GitHub
+            git pull origin main
+
+            # Spin up the container stack, rebuild assets, and flush old caches silently
+            docker-compose down
+            docker-compose up --build -d
+
+            # Purge lingering system images to optimize cloud space utilization
+            docker image prune -f
