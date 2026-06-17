@@ -1,5 +1,6 @@
-import { Module } from '@nestjs/common';
+import { Module ,forwardRef} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { BullModule } from '@nestjs/bullmq'; // 🌟 FIX: Added missing import statement for BullMQ integration
 
 import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
@@ -16,6 +17,7 @@ import { CommissionModule } from '../commission/commission.module';
 import { RiderWalletModule } from '../rider-wallet/rider-wallet.module';
 import { BranchWalletModule } from '../branch-wallet/branch-wallet.module'; 
 import { RealtimeModule } from '../realtime/realtime.module';
+import { PaymentsModule } from '../payments/payments.module';
 
 @Module({
   imports: [
@@ -28,7 +30,6 @@ import { RealtimeModule } from '../realtime/realtime.module';
       CartItem,
       Rider,
       Branch,
-      
     ]),
     
     // 2. External Modules belong down here together:
@@ -36,6 +37,11 @@ import { RealtimeModule } from '../realtime/realtime.module';
     RiderWalletModule, 
     BranchWalletModule, 
     RealtimeModule,
+    forwardRef(() => PaymentsModule),
+    
+    BullModule.registerQueue({
+      name: 'background-tasks',
+    }),
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

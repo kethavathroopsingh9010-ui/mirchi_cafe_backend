@@ -1,12 +1,14 @@
-import { Controller, Post, Get, Body, Param } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
 import { CouponsService } from './coupons.service';
+import { CreateCouponDto } from './dto/create-coupon.dto';
 
 @Controller('coupons')
 export class CouponsController {
   constructor(private readonly couponsService: CouponsService) {}
 
   @Post()
-  create(@Body() dto: any) {
+  @HttpCode(HttpStatus.CREATED)
+  create(@Body() dto: CreateCouponDto) {
     return this.couponsService.create(dto);
   }
 
@@ -16,6 +18,7 @@ export class CouponsController {
   }
 
   @Post('validate/:code')
+  @HttpCode(HttpStatus.OK)
   validate(
     @Param('code') code: string,
     @Body('orderAmount') orderAmount: number,
@@ -24,6 +27,7 @@ export class CouponsController {
   }
 
   @Post('apply/:code')
+  @HttpCode(HttpStatus.OK)
   apply(@Param('code') code: string) {
     return this.couponsService.applyCoupon(code);
   }

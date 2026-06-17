@@ -39,4 +39,7 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  @Column({ type: 'varchar', nullable: true, name: 'fcm_token' })
+  fcmToken!: string | null;
 }

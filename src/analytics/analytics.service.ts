@@ -6,7 +6,7 @@ import { Order } from '../orders/entities/order.entity';
 import { User } from '../users/entities/user.entity';
 import { Rider } from '../riders/entities/rider.entity';
 import { Product } from '../products/entities/product.entity';
-import { OrderItem } from '../orders/entities/orderItem.entity'; // 1. Added Import
+import { OrderItem } from '../orders/entities/orderItem.entity';
 
 @Injectable()
 export class AnalyticsService {
@@ -23,7 +23,7 @@ export class AnalyticsService {
     @InjectRepository(Product)
     private productRepo: Repository<Product>,
 
-    @InjectRepository(OrderItem) // 2. Added Repository Injection
+    @InjectRepository(OrderItem)
     private orderItemRepo: Repository<OrderItem>,
   ) {}
 
@@ -50,13 +50,14 @@ export class AnalyticsService {
 
   //  TOP PRODUCTS - FIXED
   async topProducts() {
-    return this.orderItemRepo // 3. Changed to orderItemRepo
+    return this.orderItemRepo
       .createQueryBuilder('orderItem')
       .leftJoin('orderItem.product', 'product') // Join towards product
       .select('product.name', 'name')
       .addSelect('SUM(orderItem.quantity)', 'totalSold')
       .groupBy('product.id')
-      .orderBy('totalSold', 'DESC')
+      .addGroupBy('product.name') // 🌟 Enforced to maintain strict ANSI/PostgreSQL grouping requirements
+      .orderBy('\"totalSold\"', 'DESC')
       .limit(5)
       .getRawMany();
   }

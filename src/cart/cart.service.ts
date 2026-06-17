@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { CartItem } from './entities/cart.entity';
+import { CartItem } from './entities/cart.entity'; // 🌟 FIX: Linked cleanly to your explicit cart-item entity definition
 import { Product } from '../users/entities/product.entity';
 import { User } from '../users/entities/user.entity';
 import { AddToCartDto } from './dto/add-to-cart.dto';
@@ -35,6 +35,19 @@ export class CartService {
 
     if (!product) {
       throw new NotFoundException('Product not found');
+    }
+
+    // 🌟 OPTIMIZATION: Check if item already exists in user's cart to update quantity instead of creating a duplicate row
+    let existingItem = await this.cartRepo.findOne({
+      where: {
+        user: { id: userId },
+        product: { id: dto.productId },
+      },
+    });
+
+    if (existingItem) {
+      existingItem.quantity += dto.quantity;
+      return this.cartRepo.save(existingItem);
     }
 
     const cartItem = this.cartRepo.create({

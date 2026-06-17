@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { OrderStatus } from '../orders/order-status.enum';
 import { Payment, PaymentStatus, PaymentMethod } from './entities/payment.entity';
 import { Order } from '../orders/entities/order.entity';
+import { OrdersService } from '../orders/orders.service'; 
 
 // Clean standard compilation imports
 import Stripe from 'stripe';
@@ -12,7 +13,7 @@ const Razorpay = require('razorpay'); // Safe CommonJS bridge to prevent type co
 @Injectable()
 export class PaymentsService {
   private stripe: any;
-  private razorpay: any; // Using explicit type to completely prevent compilation blocks
+  private razorpay: any; 
 
   constructor(
     @InjectRepository(Payment)
@@ -20,6 +21,9 @@ export class PaymentsService {
 
     @InjectRepository(Order)
     private orderRepo: Repository<Order>,
+
+    //  Integration: Inject your core orders service directly into constructor
+    private readonly ordersService: OrdersService,
   ) {
     // Initialize Stripe securely
     const StripeConstructor = require('stripe'); // Safe CommonJS bridge
@@ -28,7 +32,7 @@ export class PaymentsService {
     });
 
     // Initialize Razorpay securely 
-   this.razorpay = new Razorpay({
+    this.razorpay = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID || 'dummy_id',
       key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy_secret',
     });
@@ -91,6 +95,11 @@ export class PaymentsService {
 
     const savedPayment = await this.paymentRepo.save(payment);
 
+    //  Integration: If order is Cash on Delivery, advance the core state machine automatically
+    if (method === PaymentMethod.COD) {
+      await this.ordersService.updateOrderStatus(order.id, OrderStatus.CONFIRMED, 'SYSTEM_COD');
+    }
+
     // 4. Return both db payment confirmation and the SDK setup configurations
     return {
       payment: savedPayment,
@@ -112,11 +121,12 @@ export class PaymentsService {
     payment.status = PaymentStatus.SUCCESS;
     payment.transactionId = transactionId;
 
-    // Update order status to CONFIRMED
-    payment.order.status = OrderStatus.CONFIRMED;
-    await this.orderRepo.save(payment.order);
+    const updatedPayment = await this.paymentRepo.save(payment);
+
+    //  Integration: Use your validated transaction wrapper service to process multi-wallet metrics
+    await this.ordersService.updateOrderStatus(payment.order.id, OrderStatus.CONFIRMED, 'GATEWAY_CALLBACK');
     
-    return this.paymentRepo.save(payment);
+    return updatedPayment;
   }
 
   async findOne(id: string) {
@@ -134,8 +144,6 @@ export class PaymentsService {
   }
 
   async findOneByGatewayOrderId(gatewayOrderId: string) {
-    // This assumes you add a field for storing the active razorpay order ID, 
-    // or you can match against the transaction log reference.
     return this.paymentRepo.findOne({
       where: { transactionId: gatewayOrderId },
       relations: { order: true },

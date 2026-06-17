@@ -30,6 +30,7 @@ export class Payment {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
+  //  RELATION: Configured eager loading to seamlessly join parent order contexts automatically
   @OneToOne(() => Order, { eager: true })
   @JoinColumn()
   order!: Order;
@@ -44,15 +45,16 @@ export class Payment {
   })
   status!: PaymentStatus;
 
- @Column('decimal', {
-  precision: 10,
-  scale: 2,
-  transformer: {
-    to: (value: number) => value,
-    from: (value: string) => parseFloat(value),
-  },
-})
-amount!: number;
+  // TRANSFORMER: Keeps decimals safely stored while handling data string casts back to JavaScript floats
+  @Column('decimal', {
+    precision: 10,
+    scale: 2,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseFloat(value),
+    },
+  })
+  amount!: number;
 
   @Column({ nullable: true })
   transactionId!: string;

@@ -2,7 +2,9 @@ import { IsEnum, IsUUID, IsNumber, Min } from 'class-validator';
 import { PaymentMethod } from '../entities/payment.entity';
 
 export class CreatePaymentDto {
-  @IsEnum(PaymentMethod)
+  @IsEnum(PaymentMethod, {
+    message: 'Method must be one of the following: cod, card, stripe, razorpay',
+  })
   method!: PaymentMethod;
 
   @IsUUID()
