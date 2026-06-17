@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  #  NestJS Backend Application Container
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mirchi_backend_api
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres_db
+      - DB_PORT=5432
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres_password}
+      - DB_NAME=${DB_NAME:-mirchi_cafe}
+      - REDIS_HOST=redis_cache
+      - REDIS_PORT=6379
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
+    depends_on:
+      - postgres_db
+      - redis_cache
+    networks:
+      - mirchi_network
+
+  #  PostgreSQL Database Container
+  postgres_db:
+    image: postgres:15-alpine
+    container_name: mirchi_postgres_db
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=${DB_USERNAME:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres_password}
+      - POSTGRES_DB=${DB_NAME:-mirchi_cafe}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mirchi_network
+
+  # Redis Cache & Telemetry Stream Container
+  redis_cache:
+    image: redis:7-alpine
+    container_name: mirchi_redis_cache
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - mirchi_network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  mirchi_network:
+    driver: bridge
