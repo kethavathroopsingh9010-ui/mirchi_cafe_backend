@@ -37,16 +37,23 @@ export class NotificationService {
     }
   }
 
+  /**
+   * Fetches entire notification history for a specific profile,
+   * sorted cleanly by the most recent timestamp.
+   */
   async findUserNotifications(userId: string) {
     return this.notificationRepo.find({
       where: { user: { id: userId } },
-      order: { createdAt: 'DESC' },
+      order: { createdAt: 'DESC' }, // Newest notifications show up first at the mobile client view
     });
   }
 
+  /**
+   * Marks a specific notification entry as read from the database tracking sheet
+   */
   async markAsRead(id: string) {
     const notification = await this.notificationRepo.findOneBy({ id });
-    if (!notification) throw new NotFoundException('Not found');
+    if (!notification) throw new NotFoundException('Notification tracking record not found');
 
     notification.isRead = true;
     return this.notificationRepo.save(notification);
